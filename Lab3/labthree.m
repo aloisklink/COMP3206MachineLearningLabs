@@ -79,8 +79,8 @@ disp(['The area of the ROC is ' num2str(areaROC)]);
 truePositiveToFind = 70;
 [minValue, closestIndex] = min( abs( ROC(:,2) - truePositiveToFind) );
 threshold = ROC(closestIndex, 3);
-tPos = length(find(p1 > threshold))*100 / N;
-fPos = length(find(p2 > threshold))*100 / N;
+truePositives = length(find(p1 > threshold))*100 / N
+falsePositives = length(find(p2 > threshold))*100 / N
 %% More ROC Curves
 % Shows the ROC Curves for the data projected onto a random direction and
 % onto the direction connecting the two means.
@@ -138,6 +138,8 @@ disp(['Nearest neighbour accuracy: ' num2str(pCorrect) '%']);
 % /href{https://en.wikipedia.org/wiki/Mahalanobis_distance}{Mahalanobis distance}
 % takes into account variance and correlation, thus being a bit measure of
 % distance.
+eucCorrect = 0;
+mahCorrect = 0;
 for jtst = 1:(N1+N2)
 	% pick a point to test
 	xtst = X(jtst,:);
@@ -182,7 +184,7 @@ mahPCorrect = mahCorrect*100/(N1+N2);
 disp(['Mahalanobis Distance-to-mean accuracy: ' num2str(mahPCorrect) '%']);
 %% Posterior Probability
 % Shows $ P (\omega_1 | \mathbf{x}) $, i.e. the probability that point $
-% mathbf{x} belongs to class $ \omega_1 $.
+% mathbf{x} $ belongs to class $ \omega_1 $.
 classDistribution = gmdistribution([m1'; m2'], cat(3, C1, C2));
 clear X; clear y;
 X(:,1) = -5:0.1:5; Y = X(:,1);
