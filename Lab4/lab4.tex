@@ -1,0 +1,226 @@
+
+% This LaTeX was auto-generated from MATLAB code.
+% To make changes, update the MATLAB code and republish this document.
+
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{multicol, caption}
+\usepackage{amsmath}
+\usepackage{textcomp}
+
+\newenvironment{Figure}
+	{\par\medskip\noindent\minipage{\linewidth}}
+	{\endminipage\par\medskip}
+
+% Define new length
+\newlength{\figureWidth}
+% Set the new length to a specific value
+\setlength{\figureWidth}{2.7in}
+
+\newcommand{\makeFigure}[3]{
+	\begin{Figure}
+		\centering
+		\includegraphics [width=\figureWidth]{html/{#1}}
+		\captionof{figure}{#2}
+		\label{fig:#3}
+	\end{Figure}
+}
+
+\setlength{\columnsep}{2cm}
+\usepackage[a4paper, total={7in, 8.5in}]{geometry}
+
+\setlength{\topmargin}{-0.6in}
+\setlength{\textwidth}{7in}
+\setlength{\textheight}{9.7in}
+
+\definecolor{mygreen}{RGB}{28,172,0} % color values Red, Green, Blue
+\definecolor{mylilas}{RGB}{170,55,241}
+
+\lstset{language=Matlab,%
+	%basicstyle=\color{red},
+	basicstyle=\footnotesize\texttt{},
+	upquote=true,%
+	breaklines='true',%
+	morekeywords={matlab2tikz},
+	keywordstyle=\color{blue},%
+	morekeywords=[2]{1}, keywordstyle=[2]{\color{black}},
+	identifierstyle=\color{black},%
+	stringstyle=\color{mylilas},
+	commentstyle=\color{mygreen},%
+	showstringspaces=false,%without this there will be a symbol in the places where there is a space
+	numbers=left,%
+	numberstyle={\tiny \color{black}},% size of the numbers
+	numbersep=9pt, % this defines how far the numbers are from the text
+	emph=[1]{for,end,break},emphstyle=[1]\color{red}, %some words to emphasise
+	%emph=[2]{word1,word2}, emphstyle=[2]{style},
+}
+
+\definecolor{lightgray}{gray}{0.5}
+\setlength{\parindent}{0pt}
+
+
+\begin{document}
+	
+	\title{Machine Learning Lab Four COMP3206}
+	\author{Alois Klink \and \href{mailto:ak9g14@soton.ac.uk}{ak9g14@soton.ac.uk} \and 2704 7555}
+	\maketitle
+	
+\begin{multicols}{2}[
+	\begin{par}
+		This Lab covers Regression. It firstly covers Linear Least Square Regression, does 10-fold cross-validation on it, and finds the root-mean-square (\textbf{RMS}) error and the standard-error-of-regression (\textbf{SER}). Next, it runs a Sparse Regression Algorithm, shows the significant variables found with it and how the number of them vary when some parameters are changed, and finally it compares it with the Linear Least Square Regression. The lab notes can be found at: 
+		\url{https://secure.ecs.soton.ac.uk/notes/comp3206/ml_lab_four2016.pdf}
+	\end{par}
+	]
+
+\section*{Linear Least Square Regression}
+
+\begin{par}
+	Figure \ref{fig:linLeastSqr} shows the result of running the given code to show Linear Least Square Regression. It tries to find a linear line that has the lowest square error (ie the error (y-distance) between the actual point and the regression line, squared).
+\end{par} \vspace{0em}
+
+\makeFigure{lab4_01.eps}{Linear Least Square Regression using MATLAB}{linLeastSqr}
+
+\section*{The Standard Error of Regression (SER)}
+
+\begin{par}
+	The following code is calculate the Standard Error of Regression (SER). This is roughly equivalant to the standard deviation of the found data.
+\end{par}
+\begin{lstlisting}
+squareError = @(Factual, Fpredict) ...
+(Factual - Fpredict).'*(Factual-Fpredict);
+
+SER = @(Ytr, Ftr, Ytst, Ftst) ...
+sqrt(   squareError(Ftst, leastSquareReg(Ytr, Ftr, Ytst) ) ...
+/   (size(Ytr,1) - size(Ytr,2) ) ...
+);
+\end{lstlisting}
+
+\section*{K-Fold Cross-Validation}
+
+\begin{par}
+	K-Fold Cross-Validation involves splitting the data in K-sets. Then one set is taken for testing and the other sets for training, the next set is used for testing and the other for training, and so forth until all of the K-sets have been used for testing once, and for training K-1 times.
+\end{par} \vspace{0em}
+\begin{lstlisting}
+% The following code splits the code into K-sets
+valuesSize = size(Y,1);
+selection = randperm(valuesSize);
+k = 10; %how many partitions do we want
+dataset(k).in = []; %preallocating
+
+% Splits the data into k (roughly) equal datasets.
+for i = 1:k
+currentIndexRange = round(valuesSize*((i-1)/k))+1:round(valuesSize*(i/k));
+dataset(i).in = Y(selection(currentIndexRange),:);
+dataset(i).out = f(selection(currentIndexRange));
+end
+
+% RMS is the square-root of the mean of all the squared inputted values.
+rms = @(input) sqrt(mean(input.^2));
+rmsErrorTr = zeros(k,1);
+rmsErrorTest = zeros(k,1);
+SERFound = zeros(k,1);
+
+% Tests the data with k-1 datasets for training, and k dataset for testing
+for i = 1:k
+
+Ytr = []; Ftr = [];
+% Makes the training dataset
+for j = 1:k
+if(i ~= j)
+Ytr = [Ytr; dataset(j).in];
+Ftr = [Ftr; dataset(j).out];
+end
+end
+% Makes the testing dataset
+Ytst = dataset(i).in;
+Ftst = dataset(i).out;
+
+% See how accurate regression is on training dataset
+Ftrpredict = leastSquareReg(Ytr,Ftr,Ytr);
+rmsErrorTr(i) = rms(Ftrpredict - Ftr);
+
+% See how accurate regression is on testing dataset
+Fpredict = leastSquareReg(Ytr,Ftr,Ytst);
+rmsErrorTest(i) = rms(Fpredict - Ftst);
+
+SERFound(i) = SER(Ytr, Ftr, Ytst, Ftst);
+end
+
+disp(['Average Training Root Mean Square Error is ' num2str(mean(rmsErrorTr)) ]);
+disp(['Average Test Root Mean Square Error is ' num2str(mean(rmsErrorTest)) ]);
+disp(['Average SER is ' num2str(mean(SERFound)) ]);
+\end{lstlisting}
+
+\color{lightgray} \begin{verbatim}Average Training Root Mean Square Error is 0.50746
+Average Test Root Mean Square Error is 0.50949
+Average SER is 0.17249
+\end{verbatim} \color{black}
+
+
+\section*{Regression using the CVX Tool}
+
+\begin{par}
+	This finds the line that has the smallest distance between the regression line and the actual points using CVX. A comparison between this regression and the one found earlier can be seen in Figure \ref{fig:compare}
+\end{par} \vspace{0em}
+\begin{lstlisting}
+cvx_begin quiet
+variable w1( p+1 );
+minimize norm( Y*w1 - f )
+cvx_end
+fh1 = Y*w1;
+\end{lstlisting}
+
+
+\section*{Sparse Regression}
+
+\begin{par}
+	Sparse Regression is normally used when the number of training data is lower than the dimensionality of the data. Because of this, sparse regression is used to reduce the dimensionality of the data, so that linear regressions works, even though the number of training data is small. This can be seen in Figure \ref{fig:sigVals}. The comparison of Sparse Regression and Least Square Regression in Figure \ref{fig:compare} makes it seem that Least Square Regression is more accurate, although its outliers are much larger.
+\end{par} \vspace{0em}
+\begin{lstlisting}
+% The below code is similar to a normal regression function, except the
+% error term now includes a penalty for having large weights.
+gammas = linspace(0.01, 40, 100);
+iNzero = zeros(size(gammas,2), 1);
+for i=1:size(gammas,2)
+cvx_begin quiet
+variable w2( p+1 );
+minimize( norm(Y*w2-f) + gammas(i)*norm(w2,1) );
+cvx_end
+relevantVariables = find(abs(w2) > 1e-6);
+if i == 20
+fh2 = Y*w2;
+plot(f, fh, '.', f, fh1, 'co', f, fh2, 'mx','LineWidth', 2),
+title(['Regression vs Sparse Regression for Gamma = ' num2str(gammas(i))]);
+legend('Least Square Regression','CVX Regression', 'Sparse Regression');
+xlabel('Original Values'); ylabel('Values found using Regression');
+disp(['Relevant variables for gamma = ' num2str(gammas(i))]);
+disp(relevantVariables);
+end
+iNzero(i) = size(relevantVariables,1);
+end
+figure(2)
+plot(gammas, iNzero, 'LineWidth', 2),
+title(['Significant Variables in Sparse Regression']);
+xlabel('Penalty Complexity Weight: \gamma'); ylabel('Significant Variables (Weights above 1e-6)');
+figure(1)
+\end{lstlisting}
+
+\color{lightgray} \begin{verbatim}Relevant variables for gamma = 7.6848
+6, 11, 13
+\end{verbatim} \color{black}
+\begin{par}
+	These relevant variables are: the average number of rooms per dwelling, the pupil-teacher ratio in the town, and the ``lower status" percentage of the population. All of these seem like pretty good indicators of the value of a house.
+\end{par}
+
+\makeFigure{lab4_02.eps}{Significant Variables in Sparse Regression}{sigVals}
+
+\makeFigure{lab4_03.eps}{Least Square Regression compared with Sparse Regression}{compare}
+
+\end{multicols}
+
+\end{document}
+    
+exit

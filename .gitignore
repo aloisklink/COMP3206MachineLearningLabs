@@ -1,3 +1,5 @@
+# ---- CVX Library -------------
+libraries/
 # ---- C++ Ignore File ---------
 # Compiled Object files
 *.slo
