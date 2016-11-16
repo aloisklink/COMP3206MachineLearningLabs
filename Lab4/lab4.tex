@@ -43,7 +43,8 @@
 	%basicstyle=\color{red},
 	basicstyle=\footnotesize\texttt{},
 	upquote=true,%
-	breaklines='true',%
+	breaklines=true,%
+	tabsize=2,
 	morekeywords={matlab2tikz},
 	keywordstyle=\color{blue},%
 	morekeywords=[2]{1}, keywordstyle=[2]{\color{black}},
@@ -112,9 +113,9 @@ dataset(k).in = []; %preallocating
 
 % Splits the data into k (roughly) equal datasets.
 for i = 1:k
-currentIndexRange = round(valuesSize*((i-1)/k))+1:round(valuesSize*(i/k));
-dataset(i).in = Y(selection(currentIndexRange),:);
-dataset(i).out = f(selection(currentIndexRange));
+	currentIndexRange = round(valuesSize*((i-1)/k))+1:round(valuesSize*(i/k));
+	dataset(i).in = Y(selection(currentIndexRange),:);
+	dataset(i).out = f(selection(currentIndexRange));
 end
 
 % RMS is the square-root of the mean of all the squared inputted values.
@@ -125,28 +126,28 @@ SERFound = zeros(k,1);
 
 % Tests the data with k-1 datasets for training, and k dataset for testing
 for i = 1:k
-
-Ytr = []; Ftr = [];
-% Makes the training dataset
-for j = 1:k
-if(i ~= j)
-Ytr = [Ytr; dataset(j).in];
-Ftr = [Ftr; dataset(j).out];
-end
-end
-% Makes the testing dataset
-Ytst = dataset(i).in;
-Ftst = dataset(i).out;
-
-% See how accurate regression is on training dataset
-Ftrpredict = leastSquareReg(Ytr,Ftr,Ytr);
-rmsErrorTr(i) = rms(Ftrpredict - Ftr);
-
-% See how accurate regression is on testing dataset
-Fpredict = leastSquareReg(Ytr,Ftr,Ytst);
-rmsErrorTest(i) = rms(Fpredict - Ftst);
-
-SERFound(i) = SER(Ytr, Ftr, Ytst, Ftst);
+	
+	Ytr = []; Ftr = [];
+	% Makes the training dataset
+	for j = 1:k
+		if(i ~= j)
+			Ytr = [Ytr; dataset(j).in];
+			Ftr = [Ftr; dataset(j).out];
+		end
+	end
+	% Makes the testing dataset
+	Ytst = dataset(i).in;
+	Ftst = dataset(i).out;
+	
+	% See how accurate regression is on training dataset
+	Ftrpredict = leastSquareReg(Ytr,Ftr,Ytr);
+	rmsErrorTr(i) = rms(Ftrpredict - Ftr);
+	
+	% See how accurate regression is on testing dataset
+	Fpredict = leastSquareReg(Ytr,Ftr,Ytst);
+	rmsErrorTest(i) = rms(Fpredict - Ftst);
+	
+	SERFound(i) = SER(Ytr, Ftr, Ytst, Ftst);
 end
 
 disp(['Average Training Root Mean Square Error is ' num2str(mean(rmsErrorTr)) ]);
@@ -167,8 +168,8 @@ Average SER is 0.17249
 \end{par} \vspace{0em}
 \begin{lstlisting}
 cvx_begin quiet
-variable w1( p+1 );
-minimize norm( Y*w1 - f )
+	variable w1( p+1 );
+	minimize norm( Y*w1 - f )
 cvx_end
 fh1 = Y*w1;
 \end{lstlisting}
@@ -185,21 +186,21 @@ fh1 = Y*w1;
 gammas = linspace(0.01, 40, 100);
 iNzero = zeros(size(gammas,2), 1);
 for i=1:size(gammas,2)
-cvx_begin quiet
-variable w2( p+1 );
-minimize( norm(Y*w2-f) + gammas(i)*norm(w2,1) );
-cvx_end
-relevantVariables = find(abs(w2) > 1e-6);
-if i == 20
-fh2 = Y*w2;
-plot(f, fh, '.', f, fh1, 'co', f, fh2, 'mx','LineWidth', 2),
-title(['Regression vs Sparse Regression for Gamma = ' num2str(gammas(i))]);
-legend('Least Square Regression','CVX Regression', 'Sparse Regression');
-xlabel('Original Values'); ylabel('Values found using Regression');
-disp(['Relevant variables for gamma = ' num2str(gammas(i))]);
-disp(relevantVariables);
-end
-iNzero(i) = size(relevantVariables,1);
+	cvx_begin quiet
+		variable w2( p+1 );
+		minimize( norm(Y*w2-f) + gammas(i)*norm(w2,1) );
+	cvx_end
+	relevantVariables = find(abs(w2) > 1e-6);
+	if i == 20
+		fh2 = Y*w2;
+		plot(f, fh, '.', f, fh1, 'co', f, fh2, 'mx','LineWidth', 2),
+		title(['Regression vs Sparse Regression for Gamma = ' num2str(gammas(i))]);
+		legend('Least Square Regression','CVX Regression', 'Sparse Regression');
+		xlabel('Original Values'); ylabel('Values found using Regression');
+		disp(['Relevant variables for gamma = ' num2str(gammas(i))]);
+		disp(relevantVariables);
+	end
+	iNzero(i) = size(relevantVariables,1);
 end
 figure(2)
 plot(gammas, iNzero, 'LineWidth', 2),
