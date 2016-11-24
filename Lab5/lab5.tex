@@ -1,0 +1,151 @@
+
+% This LaTeX was auto-generated from MATLAB code.
+% To make changes, update the MATLAB code and republish this document.
+
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{multicol, caption}
+\usepackage{amsmath}
+\usepackage{textcomp}
+
+\newenvironment{Figure}
+	{\par\medskip\noindent\minipage{\linewidth}}
+	{\endminipage\par\medskip}
+
+% Define new length
+\newlength{\figureWidth}
+% Set the new length to a specific value
+\setlength{\figureWidth}{3in}
+
+\newcommand{\makeFigure}[3]{
+	\begin{Figure}
+		\centering
+		\includegraphics [width=\figureWidth]{html/{#1}}
+		\captionof{figure}{#2}
+		\label{fig:#3}
+	\end{Figure}
+}
+
+\setlength{\columnsep}{2cm}
+\usepackage[a4paper, total={7in, 8.5in}]{geometry}
+
+\setlength{\topmargin}{-0.6in}
+\setlength{\textwidth}{7in}
+\setlength{\textheight}{9.7in}
+
+\definecolor{mygreen}{RGB}{28,172,0} % color values Red, Green, Blue
+\definecolor{mylilas}{RGB}{170,55,241}
+
+\lstset{language=Matlab,%
+	%basicstyle=\color{red},
+	basicstyle=\footnotesize\texttt{},
+	upquote=true,%
+	breaklines=true,%
+	tabsize=2,
+	morekeywords={matlab2tikz},
+	keywordstyle=\color{blue},%
+	morekeywords=[2]{1}, keywordstyle=[2]{\color{black}},
+	identifierstyle=\color{black},%
+	stringstyle=\color{mylilas},
+	commentstyle=\color{mygreen},%
+	showstringspaces=false,%without this there will be a symbol in the places where there is a space
+	numbers=left,%
+	numberstyle={\tiny \color{black}},% size of the numbers
+	numbersep=9pt, % this defines how far the numbers are from the text
+	emph=[1]{for,end,break},emphstyle=[1]\color{red}, %some words to emphasise
+	%emph=[2]{word1,word2}, emphstyle=[2]{style},
+}
+
+\definecolor{lightgray}{gray}{0.5}
+\setlength{\parindent}{0pt}
+
+
+\begin{document}
+	
+	\title{Machine Learning Lab Five COMP3206}
+	\author{Alois Klink \and \href{mailto:ak9g14@soton.ac.uk}{ak9g14@soton.ac.uk} \and 2704 7555}
+	\maketitle
+	
+\begin{multicols}{2}[
+	\begin{par}
+		This Lab covers Radial Basis Function Models. An explanation of what they are can be found in Section \ref{sec:radBasis}. The lab notes can be found at: 
+		\url{https://secure.ecs.soton.ac.uk/notes/comp3206/ml_lab_five2016.pdf}
+	\end{par}
+	]
+\section*{The Radial Basis Function Model}
+\label{sec:radBasis}
+\begin{par}
+	A radial basis function model uses the sum of many weighted radial
+	basis functions to approximate a function, where each radial basis function is some
+	fucntion of distance between the function input and a point from the model.
+\end{par}
+
+\lstinputlisting[language=Matlab]{radialBasis.m}
+
+
+\section*{Results for K = Ntr/10}
+
+\begin{lstlisting}
+K = round(size(Xtr,1)/10);
+ytrpredict = radialBasis(Xtr, ytr, basisFunction, K, Xtr);
+ytstpredict = radialBasis(Xtr, ytr, basisFunction, K, Xtst);
+plot(-2:2,-2:2, 'DisplayName', 'Zero-Error Line');
+hold on; axis([-2 3.1 -2.5 2])
+plot(ytr, ytrpredict, 'r.', 'LineWidth', 2, 'DisplayName', 'Training Data');
+plot(ytst, ytstpredict, 'bx', 'LineWidth', 2, 'DisplayName', 'Test Data'), grid on
+title('RBF Prediction on Data', 'FontSize', 16);
+xlabel('Target', 'FontSize', 14);
+ylabel('Prediction', 'FontSize', 14);
+legend('Location', 'Southeast');
+hold off;
+\end{lstlisting}
+
+\makeFigure{lab5_01.eps}{Shows the difference between the real data and the predicted data from the RBF model}{1}
+
+
+\section*{RMS Error for a Range of Ks}
+
+\begin{par}
+	The following code plots the root-mean-square (RMS) error on the RBF model's output, when different K's are used. As can be seen, it appears that oddly enough, the test data does pretty well, until K reaches around 10, and the model overfits towards the training data, becoming too optimized towards the training data for real purposes. 
+\end{par}  
+\begin{lstlisting}
+rms = @(input) sqrt(mean(input.^2));
+for K = 1:110
+ytrpredict = radialBasis(Xtr, ytr, basisFunction, K, Xtr);
+trError(K) = rms(ytrpredict-ytr);
+ytstpredict = radialBasis(Xtr, ytr, basisFunction, K, Xtst);
+tstError(K) = rms(ytstpredict-ytst);
+end
+K = 1:110;
+plot(K, trError, 'LineWidth', 2, 'DisplayName', 'Training RMS Error'); hold on;
+plot(K, tstError, 'LineWidth', 2, 'DisplayName', 'Test RMS Error'), grid on
+title('RMS Error on Data with differing K', 'FontSize', 16);
+xlabel('K', 'FontSize', 14);
+ylabel('RMS Error', 'FontSize', 14);
+legend('Location', 'Northeast');
+hold off;
+\end{lstlisting}
+
+\makeFigure{lab5_02.eps}{Shows how RMS Error differs when K differs.}{2}
+
+
+\section*{Comparing Linear Least Square Regression to RBF on Housing Data}
+
+\begin{par}
+	RBF seems to be worse than Linear Least Square Regression, at least with $ K = \frac{N_tr}{10} $.
+\end{par}
+
+\makeFigure{lab5_03.eps}{Shows the RMS Error on UCI's Housing data. The RMS Error is obtained from 20 random partitionings.}{3}
+
+\section*{Comparing Linear Least Square Regression to RBF on Power Plant}
+
+\makeFigure{lab5_04.eps}{Shows the RMS Error on UCI's Combined Cycle Power Plant data. The RMS Error is obtained from 20 random partitionings.}{4}
+
+\end{multicols}
+
+\end{document}
+    
+exit

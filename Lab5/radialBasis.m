@@ -1,7 +1,8 @@
 function [ Fout ] = radialBasis( Xtr, Ftr, basisFunction, K, Xin )
 %radialBasis Predicts answers using a radial basis function model
 %   A radial basis function model uses the sum of many weighted radial
-%   basis functions to approximate a function.
+%   basis functions to approximate a function. BasisFunction is a
+%	function of distance, ie BasisFunction(distance).
 	Ntr = size(Xtr,1);
 	% performs K-Mean clustering to find the centers for the basis function
 	[C] = kmeans(Xtr, K);
