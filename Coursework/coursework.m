@@ -4,7 +4,7 @@ class(2).covar = [2 1; 1 2];
 class(1).mean = [2; 1];
 class(1).covar = [1 0; 0 1];
 
-valuesSize = 1000;
+valuesSize = 100;
 X1 = mvnrnd(class(1).mean, class(1).covar, valuesSize);
 X2 = mvnrnd(class(2).mean, class(2).covar, valuesSize);
 
@@ -13,24 +13,47 @@ X2 = mvnrnd(class(2).mean, class(2).covar, valuesSize);
 % mathbf{x} $ belongs to class $ \omega_1 $.
 classDistribution = gmdistribution([class(1).mean'; class(2).mean'], cat(3, class(1).covar, class(2).covar));
 clear X; clear y;
-X(:,1) = -5:0.1:5; Y = X(:,1);
-y(1:size(X,1),1) = Y(1);
-postProb2 = [];
+X(:,1) = -5:0.2:7; 
+Y = X(:,1);
+postProb = zeros(length(Y));
 for i = 1:size(Y,1)	
 	clear y; y(1:size(X,1),1) = Y(i);
-	postProb = posterior(classDistribution, [ X(:,1) y(:,1)]);
-	postProb2 = [postProb2 postProb(:,2)];
+	posteriorProb = posterior(classDistribution, [ X(:,1) y(:,1)]);
+	postProb(i,:) = posteriorProb(:,1);
 end
+
+% calculates the posterior probability for each of the data
+X1Post = posterior(classDistribution, [X1(:,1) X1(:,2)]);
+X2Post = posterior(classDistribution, [X2(:,1) X2(:,2)]);
+
+% 3D plot
 figure(1);
-surf(X, Y, postProb2); hold on;
-clear Zs;
-Zs(1:length(X1)) = 0.50;
-contour3(X, Y, postProb2, [0.5 0.5],'r'); xlabel('X_1'); ylabel('X_2'); zlabel('Probability');
-shading interp;
-title('Posterior Probability');
+% plots line at 50%
+contour3(X, Y, postProb, [0.5 0.5],'r');
+hold on;
+% plots the data
+plot3(X1(:,1), X1(:,2), X1Post(:,1), 'b.');
+plot3(X2(:,1), X2(:,2), X2Post(:,1), 'r.');
+% plots the posterior probability
+surf(X, Y, postProb);
+% removes the ugly black lines from the surf
+shading flat;
+
+view(-111, 21);
+legend('Bayes', '\omega_1', '\omega_2', 'Location', 'NorthEast');
+xlabel('X_1'); ylabel('X_2'); zlabel('Posterior Probability');
+title('Posterior Probability of \omega_1');
 hold off;
+
+% 2D Plot
 figure(2); clf; hold on;
-plot(X1(:,1), X1(:,2),'r.');
-plot(X2(:,1), X2(:,2),'bx');
-contour(X, Y, postProb2, [0.5 0.5],'w:');
+% plots the optimal decision boundary
+contour(X, Y, postProb, [0.5 0.5],'g');
+% plots the data
+plot(X1(:,1), X1(:,2),'b.');
+plot(X2(:,1), X2(:,2),'r.');
+
+legend('Bayes', '\omega_1', '\omega_2', 'Location', 'NorthEast');
+xlabel('X_1'); ylabel('X_2');
+title('100 Values of \omega_1 and \omega_2');
 hold off;
