@@ -1,59 +1,129 @@
 %% Machine Learning Coursework
-class(2).mean = [0; 3];
-class(2).covar = [2 1; 1 2];
-class(1).mean = [2; 1];
-class(1).covar = [1 0; 0 1];
+class(1).mean = [0; 3];
+class(1).covar = [2 1; 1 2];
+class(1).target = 1;
+% creates the display style for graphing
+class(1).style.Color = 'b';
+class(1).style.LineStyle = 'none';
+class(1).style.Marker = '.';
+class(1).style.DisplayName = '\omega_1';
+
+class(2).mean = [2; 1];
+class(2).covar = [1 0; 0 1];
+class(2).target = -1;
+class(2).style.Color = 'r';
+class(2).style.LineStyle = 'none';
+class(2).style.Marker = '.';
+class(2).style.DisplayName = '\omega_2';
 
 valuesSize = 100;
-X1 = mvnrnd(class(1).mean, class(1).covar, valuesSize);
-X2 = mvnrnd(class(2).mean, class(2).covar, valuesSize);
+% creates 100 samples from each class
+for i = 1:length(class)
+	class(i).in = mvnrnd(class(i).mean, class(i).covar, valuesSize);
+	class(i).out = class(i).target * ones(size(class(i).in,1),1);
+end
 
-%% Posterior Probability
+% combines the samples into one dataset
+data.in = [class(1).in; class(2).in];
+data.out = [class(1).out; class(2).out];
+
+%% Posterior Probability and Baye's Optimal Decision Boundary
 % Shows $ P (\omega_1 | \mathbf{x}) $, i.e. the probability that point $
 % mathbf{x} $ belongs to class $ \omega_1 $.
-classDistribution = gmdistribution([class(1).mean'; class(2).mean'], cat(3, class(1).covar, class(2).covar));
-clear X; clear y;
-X(:,1) = -5:0.2:7; 
+classDistribution = gmdistribution( [class(1).mean'; class(2).mean'], ... 
+	cat(3, class(1).covar, class(2).covar) );
+clear X;
+X(:,1) = -5:0.2:7.5; % the range to plot the graph on 
 Y = X(:,1);
 postProb = zeros(length(Y));
 for i = 1:size(Y,1)	
-	clear y; y(1:size(X,1),1) = Y(i);
-	posteriorProb = posterior(classDistribution, [ X(:,1) y(:,1)]);
+	clear y; y(1:length(X),1) = Y(i);
+	posteriorProb = posterior(classDistribution, [X y]);
 	postProb(i,:) = posteriorProb(:,1);
 end
 
-% calculates the posterior probability for each of the data
-X1Post = posterior(classDistribution, [X1(:,1) X1(:,2)]);
-X2Post = posterior(classDistribution, [X2(:,1) X2(:,2)]);
+% calculates the posterior probability for each of the data samples
+class(1).post = posterior(classDistribution, [class(1).in(:,1) class(1).in(:,2)]);
+class(2).post = posterior(classDistribution, [class(2).in(:,1) class(2).in(:,2)]);
 
-% 3D plot
+% 3D plot of Posterior probability
 figure(1);
-% plots line at 50%
-contour3(X, Y, postProb, [0.5 0.5],'r');
+% plots decision line at 50%
+contour3(X, Y, postProb, [0.5 0.5],'r', 'DisplayName', 'Bayes');
 hold on;
-% plots the data
-plot3(X1(:,1), X1(:,2), X1Post(:,1), 'b.');
-plot3(X2(:,1), X2(:,2), X2Post(:,1), 'r.');
+% plots the data samples
+for cl = class
+	plot3(cl.in(:,1), cl.in(:,2), cl.post(:,1), cl.style);
+end
+legend('show', 'Location', 'NorthEast');
 % plots the posterior probability
 surf(X, Y, postProb);
 % removes the ugly black lines from the surf
 shading flat;
 
-view(-111, 21);
-legend('Bayes', '\omega_1', '\omega_2', 'Location', 'NorthEast');
+view(14, 25);
 xlabel('X_1'); ylabel('X_2'); zlabel('Posterior Probability');
 title('Posterior Probability of \omega_1');
 hold off;
 
-% 2D Plot
+% 2D Plot of the data samples and the decision boundary
 figure(2); clf; hold on;
 % plots the optimal decision boundary
-contour(X, Y, postProb, [0.5 0.5],'g');
+contour(X, Y, postProb, [0.5 0.5],'g', 'DisplayName', 'Bayes Decision Boundary');
 % plots the data
-plot(X1(:,1), X1(:,2),'b.');
-plot(X2(:,1), X2(:,2),'r.');
-
-legend('Bayes', '\omega_1', '\omega_2', 'Location', 'NorthEast');
+for cl = class
+	plot(cl.in(:,1), cl.in(:,2), cl.style);
+end
+% legend('Bayes', '\omega_1', '\omega_2', 'Location', 'NorthEast');
+legend('show');
 xlabel('X_1'); ylabel('X_2');
 title('100 Values of \omega_1 and \omega_2');
 hold off;
+
+%% Neural Network
+neuralNet(1).numberOfLayers = 3;
+neuralNet(2).numberOfLayers = 20;
+
+% the style of the decision line:
+neuralNet(1).contourStyle.LineColor = 'm'; % magenta
+neuralNet(2).contourStyle.LineColor = 'c'; % cyan
+
+for nNet = neuralNet
+	nNet.contourStyle.DisplayName = [num2str(nNet.numberOfLayers) ' Layer Net Boundary'];
+	
+	[net] = feedforwardnet(nNet.numberOfLayers);
+	[net] = configure(net, data.in', data.out');
+	[net] = train(net, data.in', data.out');
+
+	netOutput = zeros(length(Y));
+	for j = 1:length(Y)	
+		clear y; y(1:length(X),1) = Y(j);
+		netOutput(j,:) = net([X y]');
+	end
+
+	% creates a plot for the decision boundary
+	figure(3+i);
+	% draws the decision boundary
+	contour3(X, Y, netOutput, [0.0 0.0], 'r', 'DisplayName', 'Decision Boundary');
+	hold on;
+	% removes the ugly black lines from the surf
+	for cl = [class(1) class(2)]
+		plot3(cl.in(:,1), cl.in(:,2), net([cl.in(:,1) cl.in(:,2)]'), cl.style);
+	end
+	legend('show','Location', 'Best');
+	% draws the output of the neural net
+	surf(X, Y, netOutput); 
+	shading flat;
+	xlabel('X_1'); ylabel('X_2'); zlabel('Output Weights (\omega_1 is positive)');
+	title([num2str(nNet.numberOfLayers) ' Layer Neural Network']);
+	view(-14, 25);
+	hold off;
+	
+	% adds contour lines to 2D plot
+	figure(2);
+	hold on;
+	contour(X, Y, netOutput, [0.0 0.0], 'LineColor', nNet.contourStyle.LineColor, ...
+		'DisplayName', nNet.contourStyle.DisplayName);
+	hold off;
+end
+legend('off'); legend('show','Location', 'Best');
