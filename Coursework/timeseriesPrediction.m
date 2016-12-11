@@ -33,9 +33,10 @@ title('Mackey-Glass Time Series Prediction');
 xlabel('Time');
 hold off;
 
-%% Neural Network
+%% One-step-ahead Neural Network
 
-[net] = feedforwardnet(10);
+% create feedforward net with 10 neurons and 1 layer
+[net] = feedforwardnet([1, 12, 12, 1]);
 % must transpose everything for the neural network
 [net] = configure(net, train_data.in', train_data.out');
 [net] = train(net, train_data.in', train_data.out');
@@ -48,4 +49,22 @@ legend('off'); legend('show');
 hold off;
 
 disp(['Square Error of Neural Network Prediction is: ' num2str(squareError(test_data.out, test_data_nNet'))]);
-	
+
+%% Neural Network Free-running Mode
+% Feeds the output of the neural net as the input of the next one
+
+free_running_input = test_data.in(1,:);
+test_data_freerunning = zeros(length(test_data.out),1);
+
+for i = 1:length(test_data.out)
+	test_data_freerunning(i) = net(free_running_input');
+	free_running_input = [ free_running_input(2:p) test_data_freerunning(i)];
+end
+
+figure(1);
+hold on;
+plot(test_data.time, test_data_freerunning, 'r', 'DisplayName', 'Neural Net Free-Running');
+legend('off'); legend('show');
+hold off;
+
+disp(['Square Error of Free-Running Neural Net is: ' num2str(squareError(test_data.out, test_data_freerunning))]);
