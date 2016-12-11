@@ -35,8 +35,10 @@ hold off;
 
 %% One-step-ahead Neural Network
 
-% create feedforward net with 10 neurons and 1 layer
-[net] = feedforwardnet([1, 12, 12, 1]);
+% create feedforward net with loads of layers
+% these layers aren't necessary for one-step-ahead, but they make the 
+% free-running code more stable
+[net] = feedforwardnet([1, 12, 12, 12, 12, 1]);
 % must transpose everything for the neural network
 [net] = configure(net, train_data.in', train_data.out');
 [net] = train(net, train_data.in', train_data.out');

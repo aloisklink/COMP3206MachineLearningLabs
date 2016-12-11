@@ -8,8 +8,8 @@ path(path,'../libraries/mackeyglass');
 a        = 0.2;     % value for a in eq (1)
 b        = 0.1;     % value for b in eq (1)
 tau      = 17;		% delay constant in eq (1)
-x0       = 1.2;		% initial condition: x(t=0)=x0
-deltat   = 0.1;	    % time step size (which coincides with the integration step)
+x0       = 0.9;		% initial condition: x(t=0)=x0
+deltat   = 0.5;	    % time step size (which coincides with the integration step)
 sample_n = 2000;	% total no. of samples, excluding the given initial condition
 interval = 1;	    % output is printed at every 'interval' time steps
 
@@ -41,9 +41,6 @@ for i = 1:sample_n+1,
     T(i) = time;
     x_t = x_t_plus_deltat;
 end
-
-data.values = X;
-data.time = T;
 
 end
 
