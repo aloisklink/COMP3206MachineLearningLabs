@@ -32,3 +32,20 @@ legend('show');
 title('Mackey-Glass Time Series Prediction');
 xlabel('Time');
 hold off;
+
+%% Neural Network
+
+[net] = feedforwardnet(10);
+% must transpose everything for the neural network
+[net] = configure(net, train_data.in', train_data.out');
+[net] = train(net, train_data.in', train_data.out');
+
+test_data_nNet = net(test_data.in');
+figure(1);
+hold on;
+plot(test_data.time, test_data_nNet', 'c-.', 'DisplayName', 'Neural Net Prediction');
+legend('off'); legend('show');
+hold off;
+
+disp(['Square Error of Neural Network Prediction is: ' num2str(squareError(test_data.out, test_data_nNet'))]);
+	
