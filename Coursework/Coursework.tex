@@ -1,0 +1,230 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{hyperref} % adds hyperlinks to the code
+\usepackage{multicol, caption}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{cite} % for citations
+
+\newenvironment{Figure}
+	{\par\medskip\noindent\minipage{\linewidth}}
+	{\endminipage\par\medskip}
+
+% Define new length
+\newlength{\figureWidth}
+% Set the new length to a specific value
+\setlength{\figureWidth}{3in}
+
+\newcommand{\makeFigure}[3]{
+	\begin{Figure}
+		\centering
+		\includegraphics [width=\figureWidth]{html/{#1}}
+		\captionof{figure}{#2}
+		\label{fig:#3}
+	\end{Figure}
+}
+
+\setlength{\columnsep}{2cm}
+\usepackage[a4paper, total={7in, 8.5in}]{geometry}
+
+\definecolor{mygreen}{RGB}{28,172,0} % color values Red, Green, Blue
+\definecolor{mylilas}{RGB}{170,55,241}
+
+\lstset{language=Matlab,%
+	%basicstyle=\color{red},
+	basicstyle=\footnotesize\ttfamily{},
+	upquote=true,%
+	breaklines=true,%
+	tabsize=2,
+	morekeywords={matlab2tikz},
+	keywordstyle=\color{blue},%
+	morekeywords=[2]{1}, keywordstyle=[2]{\color{black}},
+	identifierstyle=\color{black},%
+	stringstyle=\color{mylilas},
+	commentstyle=\color{mygreen},%
+	showstringspaces=false,%without this there will be a symbol in the places where there is a space
+	numbers=left,%
+	numberstyle={\tiny \color{black}},% size of the numbers
+	numbersep=9pt, % this defines how far the numbers are from the text
+	emph=[1]{for,end,break},emphstyle=[1]\color{red}, %some words to emphasise
+	%emph=[2]{word1,word2}, emphstyle=[2]{style},
+}
+
+\definecolor{lightgray}{gray}{0.5}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+
+\usepackage{fancyhdr} % adds headers and footers
+\pagestyle{fancy} % has to go after margin creation code
+
+\lhead{ \fancyplain{}{Alois Klink} }
+\chead{Machine Learning Assignment COMP3206}
+\rhead{ \fancyplain{}{2704 7555} }
+\begin{document}
+	
+	\title{Machine Learning Assignment COMP3206}
+	\author{Alois Klink \and \href{mailto:ak9g14@soton.ac.uk}{ak9g14@soton.ac.uk} \and 2704 7555}
+	\maketitle
+	
+\begin{multicols}{2}[
+	\begin{par}
+		This Assignment covers Neural Networks and Time Series Prediction. The assignment notes can be found at: 
+		\url{https://secure.ecs.soton.ac.uk/notes/comp6229/machinelearningassignment2016.pdf}
+	\end{par}
+	]
+\section{Neural Networks}
+
+\subsection{Data Creation}
+\label{sec:dataCreation}
+\begin{par}
+	Figure \ref{fig:samples} shows 100 samples of two bi-variate normally distributed classes
+	(ie \begin{math}
+	\omega_1, \omega_2 \sim \mathcal{N}_2 (\mathbf{m}_i, \mathbf{C}_i)
+	\end{math} ), with means and co-variances as follows:
+	\begin{math}
+		\mathbf{m}_1 = \begin{pmatrix}
+			0 \\ 3
+		\end{pmatrix}, \;
+		\mathbf{C}_1 = \begin{pmatrix}
+			2 & 1 \\
+			1 & 2
+		\end{pmatrix}
+	\end{math}
+	and
+	\begin{math}
+		\mathbf{m}_2 = \begin{pmatrix}
+			2 \\ 1
+		\end{pmatrix}, \;
+		\mathbf{C}_2 = \begin{pmatrix}
+			1 & 0 \\
+			0 & 1
+		\end{pmatrix} 
+	\end{math}
+\end{par}
+
+\makeFigure{neuralNetwork_02.eps}{Bayes Optimal Decision Boundary for \(\omega_1\) and \(\omega_2\)}{samples}
+
+Figure \ref{fig:samples} also shows Bayes Optimal Decision Boundary, (the "best possible classifier" \cite{devroye2013probabilistic}). This is equal to the 50\% intersection of the posterior probability curve in Figure \ref{fig:postProb}.
+
+\subsection{Posterior Probability}
+
+\makeFigure{neuralNetwork_01.eps}{The Posterior Probability of Class 1 (ie \(P(\omega_1 \| \mathbf{x})\))}{postProb}
+
+The Posterior Probability is the chance that a point, \(\mathbf{x}\), belongs to a certain class. It can be calculated by Equation \ref{eq:postProb}: 
+\begin{equation}
+\label{eq:postProb}
+	P (\omega_i | \mathbf{x}) = \frac{P (\mathbf{x} | \omega_i) P(\omega_i)}{P(\mathbf{x})}
+\end{equation}
+
+However, as MATLAB's Statistics and Machine Learning Toolbox has a \lstinline|posterior()| function, this can be used instead:
+
+\lstinputlisting[language=Matlab, firstline=38, lastline=49]{neuralNetwork.m}
+
+Figure \ref{fig:postProb} shows the posterior probability of \(\omega_1\), as well the posterior probabilities of each of the samples shown in Figure \ref{fig:samples}. When the posterior probability reaches 50\%, (ie the Bayes Optimal Decision Boundary), this is drawn on the graph.
+
+\subsection{Feedforward Neural Networks}
+\label{sec:ffNNet}
+Using the \lstinline|feedforwardnet()| neural net in MATLAB's Neural Networks Toolbox, a neural net with 20 neurons in one hidden layer, and one with 3 neurons in one hidden layer, was trained with the samples created in Section \ref{sec:dataCreation}. The resulting output of the neural nets can be seen in Figures \ref{fig:3Neuron} and \ref{fig:20Neuron}, along with their decision boundary.
+
+These neural nets were trained with the default Levenberg-Marquardt algorithm (\lstinline|trainlm|, also known as the damped-least-squares method), which is designed for linear regression problems, not pattern recognition problems \cite{MATLAB:2016}. However, this should have converged to the same result, though it may have taken many more training iterations. 
+
+\makeFigure{neuralNetwork_03.eps}{3 Neuron Neural Net Output and Boundary}{3Neuron}
+\makeFigure{neuralNetwork_04.eps}{20 Neuron Neural Net Output and Boundary}{20Neuron}
+
+Figure \ref{fig:compBoundaries} shows a comparison between the decision boundaries of the neural nets in Figures \ref{fig:3Neuron} and \ref{fig:20Neuron}, along with the Bayes Optimal Boundary shown in Figure \ref{fig:samples}. The 3 neuron uni-layer neural net seems to have almost applied linear regression, and while the 20 neuron uni-layer neural net approaches the optimal decision boundary, it over-fits the data slightly.
+
+\makeFigure{neuralNetwork_05.eps}{Comparison Between Neural Net Decision Boundary and Bayes Optimal Decision Boundary}{compBoundaries}
+
+\section{Time Series Prediction}
+
+\subsection{Chaotic Time Series}
+
+The Mackey-Glass model \cite{mackey1977oscillation} is a chaotic oscillatory time series function. The function is found by integrating Equation \ref{eq:MackeyGlass}.
+\begin{equation}
+\label{eq:MackeyGlass}
+	\frac{dx(t)}{dt}=\frac{ax(t-\tau)}{1+x(t-\tau)^{10}}-bx(t)
+\end{equation}
+
+The variables of the model were the same used in \cite{wan1993modeling}, with \(\tau = 17\), and a higher sampling rate as 2000 samples were being used, instead of only 1100:
+\lstinputlisting[language=Matlab, firstline=7, lastline=14]{createMackeySamples.m}
+
+2000 Samples were generated, and the first 1500 samples were used as a training set, and the last 500 as a testing set. The test data set can be found in Figure \ref{fig:timeSeriesLinearRegression}. \(P\), the number of previous samples to be used as the input, was set to \(P = 20\). Because of this, the first 20 samples could not be used as an input, as they lacked the necessary previous samples. The following code details a MATLAB function that implements this:
+
+\lstinputlisting[language=Matlab]{convertTimeSeriesToMLInput.m}
+
+\subsubsection{Linear Predictor}
+\label{sec:linPredict}
+A Linear Predictor using Linear Least-Square-Regression was created to perform \textit{one-step-ahead} prediction. Given that the training data input is \(\mathbf{x}_{tr}\), and the output is \(\mathbf{F}_{tr}\), weights: \( \mathbf{a} \) and \( a_0\), can be found that fit the equation: \(\mathbf{F}_{tr} = \mathbf{x}_{tr} \times \mathbf{a} + a_0\). \\
+
+This equation can be simplified by letting \(\mathbf{w} = 
+\begin{pmatrix} 
+	\mathbf{a} \\
+	a_0
+\end{pmatrix}, \; \mathbf{y}_i = 
+\begin{pmatrix} 
+	\mathbf{x}_i & 1
+\end{pmatrix}
+\), therefore \(\mathbf{F}_{tr} = \mathbf{y}_{tr} \times \mathbf{w}\), therefore \(\mathbf{y}_{tr}^T \times \mathbf{y}_{tr} \times \mathbf{w} = \mathbf{y}_{tr}^T \times \mathbf{F}_{tr}\) can be solved for \(\mathbf{w}\) to find the weights, and the predicted output can be found with: \(F_{test} = \mathbf{y}_{test} \times \mathbf{w}\). \\
+
+This was implemented in MATLAB by using the following lambda expression:
+
+\lstinputlisting[language=Matlab, firstline=14, lastline=19]{timeseriesPrediction.m}
+
+The prediction can be found in Figure \ref{fig:timeSeriesLinearRegression}, which looks identical to the actual Mackey-Glass series output.
+
+\makeFigure{timeseriesPrediction_01.eps}{Mackey-Glass Linear Regression \textit{One-step-ahead} Prediction}{timeSeriesLinearRegression}
+
+The square error was calculated with the following equation:
+\begin{math}
+	\textbf{Error} = \textbf{F}_{actual} - \textbf{F}_{predicted}, \;
+	Square\;Error = \textbf{Error}^T \times \textbf{Error}
+\end{math}
+and implemented using the following MATLAB lambda expression:
+\lstinputlisting[language=Matlab, firstline=23, lastline=24]{timeseriesPrediction.m}
+
+The square error of the \textit{one-step-ahead} linear regression was found to be \lstinline|Square Error of Linear Regression Prediction is: 0.00023918|, which seems extremely accurate.
+
+\subsubsection{Feedforward Neural Network}
+Training and testing the neural network in \textit{one-step-ahead} mode, using the same data as Section \ref{sec:linPredict}, and a similar configuration as Section \ref{sec:ffNNet}, resulted in the predictions shown in Figure \ref{fig:timeSeriesLNNet}. 
+
+The number of neurons was set to be \lstinline|[1, 12, 12, 12, 12, 1]|, ie a sexa-layer neural net was made with the first and last hidden layers having 1 neuron, and the rest having 12 neurons. These values were chosen as they gave stable oscillations in free-running mode, which can be seen in Section \ref{sec:freeRunning}.
+
+\makeFigure{timeseriesPrediction_02.eps}{Mackey-Glass Neural Network Prediction}{timeSeriesLNNet}
+
+The square error was found to be half an order of magnitude larger than the linear regression square error: \lstinline|Square Error of Neural Network Prediction is: 0.00074024|, however this is still extremely accurate.
+
+\subsubsection{Feedforward Neural Net in Free-running Mode}
+\label{sec:freeRunning}
+
+The Neural Net was then tested in free-running mode, ie the last \(P = 20\) predicted outputs are fed as inputs to find the next predicted output \cite{wan1993modeling}, which is shown in Figure \ref{freeRunning}. 
+
+In free-running mode, the first few predictions are pretty accurate, but accuracy is quickly lost and the prediction goes quite wrong.
+
+\makeFigure{timeseriesPrediction_03.eps}{Mackey-Glass Neural Net Prediction in Free-running Mode}{freeRunning}
+
+\subsection{Financial Time Series}
+As input data, the last \(P = 20\) days of market closing prices of the S\&P 500 index fund was used. The output data was the current closing price. Five years of data was used, with the first \(^3/_4\) being used for training, and the last quarter for testing.
+
+Training a uni-layer 20 neuron feedforward neural network caused Figure \ref{fig:SnP500} to be created when the test data was input. Although this result looks pretty good, the neural net mostly only output the previous day's price as the prediction, ie it was pretty useless.
+
+\makeFigure{FinancialTimeSeries_01.eps}{S\%P 500 Financial Time Series Neural Network}{SnP500}
+
+To confirm that these predictions could not make money, the following market model was made: if the model predicts the price will go up the next day, buy one and sell it the next day. Else if the model predicts the price will go down the next day, sell one and buy it again the next day. The actual difference of the model would be profit if the prediction was in the correct direction, and a loss otherwise.
+
+\lstinputlisting[language=Matlab, firstline=73, lastline=78]{FinancialTimeSeries.m}
+
+As the neural net is trained randomly, 20 different neural networks were trained, and the mean profit from the trading model was calculated: \lstinline|Gain Per Day from 1 input variables: -0.00024568|. This number is a slight loss, and equivalent to a 10\% loss per year. For comparison, the average gain per year of the S\&P 500 is 10\% \cite{averageSnP500Gain}, which is \(0.00026\%\) per day.
+
+In an attempt to increase the accuracy of the neural net, the last \(P = 20\) volume traded values were used as noisier than the previous neural net. In addition, the average gain per day was even worse: \lstinline|Gain Per Day from 2 input variables: -0.00055666|, which is an annual loss of about 23\%. So the added variables actually makes the prediction worse, although tuning the number of layers and neurons may increase this.
+
+\bibliographystyle{IEEEtran}
+\bibliography{bibliography}
+
+\end{multicols}
+
+
+\end{document}
+    
+exit

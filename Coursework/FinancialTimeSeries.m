@@ -61,8 +61,8 @@ for i = 1:2
 		num2str(squareError(test_data.out, test_data_nNet'))]);
 
 	% finds the average % gain per day
-	GainPerDay = zeros(5,1);
-	for trail = 1:length(GainPerDay)
+	GainPerDay = zeros(20,1);
+	for trial = 1:length(GainPerDay)
 		[net] = cascadeforwardnet(nets(i).neurons);
 		% must transpose everything for the neural network
 		[net] = configure(net, train_data.in(:,1:p*i)', train_data.out');
@@ -75,7 +75,7 @@ for i = 1:2
 		buyOrSell = (diff(test_data_nNet) > 0) - (diff(test_data_nNet) < 0);
 		% if buy and price goes up/sell and price goes down, profit!
 		% else lose money
-		GainPerDay(trail) = mean( diff(test_data.out') .* buyOrSell / test_data.out(1:length(test_data.out)-1)');
+		GainPerDay(trial) = mean( diff(test_data.out') .* buyOrSell / test_data.out(1:length(test_data.out)-1)');
 	end
 	% shows the average average gain per day
 	disp(['Gain Per Day from ' num2str(i) ' input variables: ' num2str(mean(GainPerDay))]);

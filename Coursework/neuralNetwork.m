@@ -9,6 +9,7 @@ class(1).target = 1;
 class(1).style.Color = 'b';
 class(1).style.LineStyle = 'none';
 class(1).style.Marker = '.';
+class(1).style.MarkerSize = 10;
 class(1).style.DisplayName = '\omega_1';
 
 class(2).mean = [2; 1];
@@ -17,6 +18,7 @@ class(2).target = -1;
 class(2).style.Color = 'r';
 class(2).style.LineStyle = 'none';
 class(2).style.Marker = '.';
+class(2).style.MarkerSize = 10;
 class(2).style.DisplayName = '\omega_2';
 
 valuesSize = 100;
@@ -84,17 +86,17 @@ title('100 Values of \omega_1 and \omega_2');
 hold off;
 
 %% Neural Network
-neuralNet(1).numberOfLayers = 3;
-neuralNet(2).numberOfLayers = 20;
+neuralNet(1).numberOfNeurons = 3;
+neuralNet(2).numberOfNeurons = 20;
 
 % the style of the decision line:
 neuralNet(1).contourStyle.LineColor = 'm'; % magenta
 neuralNet(2).contourStyle.LineColor = 'c'; % cyan
 
 for nNet = neuralNet
-	nNet.contourStyle.DisplayName = [num2str(nNet.numberOfLayers) ' Layer Net Boundary'];
+	nNet.contourStyle.DisplayName = ['Monolayer ' num2str(nNet.numberOfNeurons) ' Neuron Net Boundary'];
 	
-	[net] = feedforwardnet(nNet.numberOfLayers);
+	[net] = feedforwardnet(nNet.numberOfNeurons);
 	[net] = configure(net, data.in', data.out');
 	[net] = train(net, data.in', data.out');
 
@@ -105,7 +107,7 @@ for nNet = neuralNet
 	end
 
 	% creates a plot for the decision boundary
-	figure(3+i);
+	figure;
 	% draws the decision boundary
 	contour3(X, Y, netOutput, [0.0 0.0], 'r', 'DisplayName', 'Decision Boundary');
 	hold on;
@@ -118,7 +120,7 @@ for nNet = neuralNet
 	surf(X, Y, netOutput); 
 	shading flat;
 	xlabel('X_1'); ylabel('X_2'); zlabel('Output Weights (\omega_1 is positive)');
-	title([num2str(nNet.numberOfLayers) ' Layer Neural Network']);
+	title(['Singe Layer ' num2str(nNet.numberOfNeurons) ' Neurons Neural Network']);
 	view(-14, 25);
 	hold off;
 	

@@ -6,9 +6,9 @@ function [ trainData, testData ] = convertTimeSeriesToMLInput( data, time, p, tr
 %    input:        output:
 %   [ 1 2 3 4 5;   [ 6;
 %     2 3 4 5 6;     7;
-%	  3 4 5 6 7;     8;
-%	  4 5 6 7 8;     9;
-%	  5 6 7 8 9 ]    10 ]
+%     3 4 5 6 7;     8;
+%     4 5 6 7 8;     9;
+%     5 6 7 8 9 ]    10 ]
 
 % tr_tst(1) contains training data
 % tr_tst(2) contains testing data
