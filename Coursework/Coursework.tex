@@ -150,9 +150,7 @@ The Mackey-Glass model \cite{mackey1977oscillation} is a chaotic oscillatory tim
 The variables of the model were the same used in \cite{wan1993modeling}, with \(\tau = 17\), and a higher sampling rate as 2000 samples were being used, instead of only 1100:
 \lstinputlisting[language=Matlab, firstline=7, lastline=14]{createMackeySamples.m}
 
-2000 Samples were generated, and the first 1500 samples were used as a training set, and the last 500 as a testing set. The test data set can be found in Figure \ref{fig:timeSeriesLinearRegression}. \(P\), the number of previous samples to be used as the input, was set to \(P = 20\). Because of this, the first 20 samples could not be used as an input, as they lacked the necessary previous samples. The following code details a MATLAB function that implements this:
-
-\lstinputlisting[language=Matlab]{convertTimeSeriesToMLInput.m}
+2000 Samples were generated, and the first 1500 samples were used as a training set, and the last 500 as a testing set. The test data set can be found in Figure \ref{fig:timeSeriesLinearRegression}. \(P\), the number of previous samples to be used as the input, was set to \(P = 20\). Because of this, the first 20 samples could not be used as an input, as they lacked the necessary previous samples.
 
 \subsubsection{Linear Predictor}
 \label{sec:linPredict}
@@ -198,11 +196,11 @@ The square error was found to be half an order of magnitude larger than the line
 \subsubsection{Feedforward Neural Net in Free-running Mode}
 \label{sec:freeRunning}
 
+\makeFigure{timeseriesPrediction_03.eps}{Mackey-Glass Neural Net Prediction in Free-running Mode}{freeRunning}
+
 The Neural Net was then tested in free-running mode, ie the last \(P = 20\) predicted outputs are fed as inputs to find the next predicted output \cite{wan1993modeling}, which is shown in Figure \ref{freeRunning}. 
 
 In free-running mode, the first few predictions are pretty accurate, but accuracy is quickly lost and the prediction goes quite wrong.
-
-\makeFigure{timeseriesPrediction_03.eps}{Mackey-Glass Neural Net Prediction in Free-running Mode}{freeRunning}
 
 \subsection{Financial Time Series}
 As input data, the last \(P = 20\) days of market closing prices of the S\&P 500 index fund was used. The output data was the current closing price. Five years of data was used, with the first \(^3/_4\) being used for training, and the last quarter for testing.
@@ -218,6 +216,10 @@ To confirm that these predictions could not make money, the following market mod
 As the neural net is trained randomly, 20 different neural networks were trained, and the mean profit from the trading model was calculated: \lstinline|Gain Per Day from 1 input variables: -0.00024568|. This number is a slight loss, and equivalent to a 10\% loss per year. For comparison, the average gain per year of the S\&P 500 is 10\% \cite{averageSnP500Gain}, which is \(0.00026\%\) per day.
 
 In an attempt to increase the accuracy of the neural net, the last \(P = 20\) volume traded values were used as noisier than the previous neural net. In addition, the average gain per day was even worse: \lstinline|Gain Per Day from 2 input variables: -0.00055666|, which is an annual loss of about 23\%. So the added variables actually makes the prediction worse, although tuning the number of layers and neurons may increase this.
+
+Below show the financial time series code:
+
+\lstinputlisting[language=Matlab]{FinancialTimeSeries.m}
 
 \bibliographystyle{IEEEtran}
 \bibliography{bibliography}
