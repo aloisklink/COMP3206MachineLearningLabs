@@ -4,10 +4,11 @@
 # report
 
 # gets and installs the libraries
-getLibraries.sh
+./getLibraries.sh
 
 # runs all the code to create images for LaTeX
 matlab -nodesktop -nosplash < createImages.m
 
 # compiles the TeX file and makes a .pdf
-pdflatex Coursework.tex
+# use latexmk so that bibtex and hyperlinks compile properly
+latexmk -pdf Coursework.tex

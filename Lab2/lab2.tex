@@ -9,6 +9,7 @@
 \usepackage{hyperref}
 \usepackage{multicol, caption}
 \usepackage{amsmath}
+\usepackage{textcomp}
 
 \newenvironment{Figure}
 	{\par\medskip\noindent\minipage{\linewidth}}
@@ -26,6 +27,15 @@
 % Set the new length to a specific value
 \setlength{\figureWidth}{3in}
 
+\newcommand{\makeFigure}[3]{
+	\begin{Figure}
+		\centering
+		\includegraphics [width=\figureWidth]{html/{#1}}
+		\captionof{figure}{#2}
+		\label{fig:#3}
+	\end{Figure}
+}
+
 \definecolor{mygreen}{RGB}{28,172,0} % color values Red, Green, Blue
 \definecolor{mylilas}{RGB}{170,55,241}
 
@@ -33,6 +43,7 @@
 	%basicstyle=\color{red},
 	basicstyle=\footnotesize\texttt{},
 	breaklines=true,%
+	upquote=true,%
 	morekeywords={matlab2tikz},
 	keywordstyle=\color{blue},%
 	morekeywords=[2]{1}, keywordstyle=[2]{\color{black}},
@@ -94,12 +105,7 @@ angle(2) = angle(1) + pi/2;
 plot([0 distance*cos(angle(2))], [0 distance*sin(angle(2))], 'DisplayName','Perpendicular Distance to Origin');
 legend('show'); hold off;
 \end{lstlisting}
-\begin{Figure}
-	\centering
-		\includegraphics [width=\figureWidth]{labtwo_01.eps}
-	\captionof{figure}{Perpendicular Distance to Origin}
-	\label{fig:perpDist}
-\end{Figure}
+\makeFigure{labtwo_01.eps}{Perpendicular Distance to Origin}{perpDist}
 \begin{par}
 As can be seen in Figure \ref{fig:perpDist}, the above line is perpendicular with the the original line, goes to the origin, is the same length as the distance given, and meets the line.
 \end{par}
@@ -205,12 +211,8 @@ legend('show'); hold off;
         \color{lightgray} \begin{verbatim}Success Ratio =0.9
 \end{verbatim} \color{black}
 
-\begin{Figure}
-	\centering
-		\includegraphics [width=\figureWidth]{labtwo_04.eps}
-	\captionof{figure}{Perpendicular Distance to Origin}
-	\label{fig:boundaries}
-\end{Figure}
+\makeFigure{labtwo_04.eps}{Perpendicular Distance to Origin}{boundaries}
+
 \begin{par}
 As you can see in Figure \ref{fig:boundaries}, the boundary of the Perceptron Learning Algorithm is quite similar to the Bayes Optimal Class Boundry, but not perfect. As \(\eta\) (eta) and the max number of iterations are increased, the accuracy of the Perceptron Learning Algorithm increases, but it reaches a limit as it is impossible to classifly all the data correctly, due to the nature of a Normal Distribution having a range of infinity.
 \end{par}

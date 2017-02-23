@@ -8,6 +8,7 @@
 \usepackage{listings}
 \usepackage{hyperref}
 \usepackage{multicol}
+\usepackage{textcomp}
 \setlength{\columnsep}{2cm}
 \usepackage[a4paper, total={7in, 8.5in}]{geometry}
 
@@ -26,6 +27,7 @@
 \lstset{language=Matlab,%
 	%basicstyle=\color{red},
 	basicstyle=\footnotesize\texttt{},
+	upquote=true,% replaces quotation marks in code with correct MATLAB ones
 	breaklines=true,%
 	morekeywords={matlab2tikz},
 	keywordstyle=\color{blue},%
@@ -74,7 +76,7 @@ ylabel('Size of Category');
 title('Uniform Random Numbers Histogram');
 \end{lstlisting}
 
-\includegraphics [width=\figureWidth]{labone_01.eps}
+\includegraphics [width=\figureWidth]{html/labone_01.eps}
 \begin{par}
 The following shows a histogram of N=1000 normal distrubuted random numbers. (Also known as a Gaussian distribution). The histogram has 10 categories with equal spread. It follows the sterotypical normal distribution `bell' curve.
 \end{par} \vspace{1em}
@@ -86,7 +88,7 @@ ylabel('Size of Category');
 title('Normal Distributed Numbers Histogram');
 \end{lstlisting}
 
-\includegraphics [width=\figureWidth]{labone_02.eps}
+\includegraphics [width=\figureWidth]{html/labone_02.eps}
 \begin{par}
 The following shows a histogram of the sum of 12 uniform distributed random numbers minus the sum of 12 other uniform distributed random numbers.
 \end{par} \vspace{1em}
@@ -102,7 +104,7 @@ hist(x1,40);
 xlabel('Category Value'); ylabel('Size of Category'); title('Normal Distributed Numbers Histogram');
 \end{lstlisting}
 
-\includegraphics [width=\figureWidth]{labone_03.eps}
+\includegraphics [width=\figureWidth]{html/labone_03.eps}
 
 
 \subsection*{Step 3 and 4}
@@ -133,7 +135,7 @@ plot(X(:,1),X(:,2),'c.', Y(:,1),Y(:,2),'mx');
 xlabel('X_1 features'); ylabel('X_2 features'); title('Scatter Plot of X and Y');
 \end{lstlisting}
 
-\includegraphics [width=\figureWidth]{labone_04.eps}
+\includegraphics [width=\figureWidth]{html/labone_04.eps}
 \begin{par}
 This graph shows \textbf{Y} projected onto a line \textbf{W} with direction $\theta$. It then plots the variance of this for each $\theta$. This makes a sine wave, whose maxima and minima correspond to \textbf{C}'s eigenvalues, and the turning points correspond to the location of \textbf{C}'s eigenvectors.
 \end{par} \vspace{1em}
@@ -183,7 +185,7 @@ plot(eigVecAngs(1)*[1 1], [1 3]); plot(eigVecAngs(2)*[1 1], [1 3]);
 hold off;
 \end{lstlisting}
 
-\includegraphics [width=\figureWidth]{labone_05.eps}
+\includegraphics [width=\figureWidth]{html/labone_05.eps}
 
 \end{multicols}
 
